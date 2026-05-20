@@ -2124,15 +2124,15 @@ button {
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.01em;
+  overflow-wrap: break-word;
+  word-break: break-all;
+  min-width: 0;
 }
 .contact-arrow { transition: transform 0.4s var(--ease); }
 
-@media (max-width: 640px) {
+@media (max-width: 720px) {
   .contact-grid { grid-template-columns: 1fr; }
-  .contact-card:nth-child(odd), .contact-card:nth-child(even) {
-    border-right: 0;
-    padding: 22px 8px;
-  }
+  .contact-card:nth-child(odd) { border-right: none; }
   .contact-value { font-size: 18px; }
 }
 
