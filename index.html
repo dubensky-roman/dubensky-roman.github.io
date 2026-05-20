@@ -176,6 +176,7 @@ button {
   .nav-cta { display: none; }
   .nav-toggle { display: flex; }
   .nav-mobile-cta {
+    display: block;
     margin-top: 8px;
     padding: 14px 20px !important;
     background: var(--accent);
@@ -3196,9 +3197,18 @@ function CaseOverlay({ caseData, originRect, onClose, onNext }) {
 
 function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navRef = useRef(null);
   const close = () => setMenuOpen(false);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e) => {
+      if (navRef.current && !navRef.current.contains(e.target)) close();
+    };
+    document.addEventListener('pointerdown', handler);
+    return () => document.removeEventListener('pointerdown', handler);
+  }, [menuOpen]);
   return (
-    <nav className="nav">
+    <nav className="nav" ref={navRef}>
       <div className="shell nav-inner">
         <a href="#top" className="nav-logo" onClick={close}>
           Roman Dubensky
