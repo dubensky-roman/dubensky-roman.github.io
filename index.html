@@ -174,6 +174,17 @@ button {
   .nav-links a::after { display: none; }
   .nav-cta { display: none; }
   .nav-toggle { display: flex; }
+  .nav-mobile-cta {
+    margin-top: 8px;
+    padding: 14px 20px !important;
+    background: var(--accent);
+    color: var(--paper) !important;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    text-align: center;
+    border-bottom: none !important;
+  }
 }
 
 /* ============= Hero ============= */
@@ -212,7 +223,7 @@ button {
 }
 
 .hero h1 {
-  font-size: clamp(56px, min(12vw, 18vh), 200px);
+  font-size: clamp(56px, min(12vw, 16vh), 200px);
   font-weight: 700;
   line-height: 0.82;
   letter-spacing: -0.04em;
@@ -235,6 +246,7 @@ button {
   transform: translateY(110%);
   animation: rise 0.9s var(--ease) forwards;
   padding-bottom: 0.02em;
+  white-space: nowrap;
 }
 .hero h1 .line:nth-child(2) > span { animation-delay: 0.08s; }
 .hero h1 .line:nth-child(3) > span { animation-delay: 0.16s; }
@@ -3196,6 +3208,7 @@ function Nav() {
           <a href="#about" onClick={close}>About</a>
           <a href="#experience" onClick={close}>Experience</a>
           <a href="#capabilities" onClick={close}>Capabilities</a>
+          <a href="#contact" onClick={close} className="nav-mobile-cta">Get in touch</a>
         </div>
         <button
           className="nav-toggle"
