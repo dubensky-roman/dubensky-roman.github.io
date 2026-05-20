@@ -313,6 +313,7 @@ button {
 }
 @media (max-width: 720px) {
   .section-head { grid-template-columns: 1fr; gap: 12px; }
+  .section-head::before, .section-head::after { display: none; }
 }
 
 /* ============= About ============= */
@@ -3584,15 +3585,15 @@ function Contact() {
       )
     },
     {
-      label: "Behance",
-      value: "behance.net/dubensky",
-      href: "https://www.behance.net/dubensky",
+      label: "LinkedIn",
+      value: "roman-dubensky",
+      href: "https://www.linkedin.com/in/roman-dubensky/",
       icon: (
         <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
-          <path d="M2 5 H7 C9 5 10 6 10 7.5 C10 9 9 10 7 10 H2 Z M2 10 H8 C10 10 11 11 11 13 C11 15 10 16 7.5 16 H2 Z"
-            stroke="currentColor" strokeWidth="1.4" />
-          <path d="M13 6 H19" stroke="currentColor" strokeWidth="1.4" />
-          <circle cx="16" cy="13" r="3.5" stroke="currentColor" strokeWidth="1.4" />
+          <rect x="2" y="2" width="18" height="18" rx="3" stroke="currentColor" strokeWidth="1.4" />
+          <path d="M6 9.5V16" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+          <circle cx="6" cy="6.5" r="1" fill="currentColor" />
+          <path d="M10 16V12.5C10 11 11 9.5 12.5 9.5C14 9.5 15 10.5 15 12.5V16" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
         </svg>
       )
     },
