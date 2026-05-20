@@ -138,6 +138,15 @@ button {
 .nav-cta:hover .arrow { transform: translate(2px, -2px); }
 
 .nav-mobile-cta { display: none; }
+.nav-backdrop {
+  position: fixed;
+  inset: 0;
+  top: 68px;
+  z-index: 48;
+  background: oklch(0.08 0.01 46 / 0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
 .nav-toggle {
   display: none;
   width: 44px;
@@ -152,15 +161,6 @@ button {
 .nav-toggle:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
 
 @media (max-width: 720px) {
-  .nav-backdrop {
-    position: fixed;
-    inset: 0;
-    top: 68px;
-    z-index: 48;
-    background: oklch(0.08 0.01 46 / 0.45);
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
-  }
   .nav-links {
     display: none;
     flex-direction: column;
@@ -3196,9 +3196,17 @@ function CaseOverlay({ caseData, originRect, onClose, onNext }) {
 function Nav() {
   const [menuOpen, setMenuOpen] = useState(false);
   const close = () => setMenuOpen(false);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const el = document.createElement('div');
+    el.className = 'nav-backdrop';
+    el.setAttribute('aria-hidden', 'true');
+    el.addEventListener('click', close);
+    document.body.appendChild(el);
+    return () => { el.removeEventListener('click', close); document.body.removeChild(el); };
+  }, [menuOpen]);
   return (
     <nav className="nav">
-      {menuOpen && <div className="nav-backdrop" onClick={close} aria-hidden="true" />}
       <div className="shell nav-inner">
         <a href="#top" className="nav-logo" onClick={close}>
           Roman Dubensky
