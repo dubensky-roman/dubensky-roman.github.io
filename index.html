@@ -1009,9 +1009,9 @@ button {
   width: 40px;
   height: 40px;
   border-radius: 12px;
-  background: oklch(0.78 0.14 145 / 0.1);
-  border: 1px solid oklch(0.78 0.14 145 / 0.25);
-  color: oklch(0.82 0.14 145);
+  background: oklch(0.55 0.20 20 / 0.12);
+  border: 1px solid oklch(0.55 0.20 20 / 0.30);
+  color: oklch(0.72 0.18 20);
   display: grid;
   place-items: center;
   flex-shrink: 0;
@@ -2655,6 +2655,21 @@ function Icon({ name }) {
           <circle cx="12" cy="12" r="10" />
           <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
           <line x1="12" y1="17" x2="12.01" y2="17" />
+        </svg>
+      );
+    case "search":
+      return (
+        <svg {...props}>
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
+      );
+    case "layers":
+      return (
+        <svg {...props}>
+          <path d="M12 2 L2 7 L12 12 L22 7 Z" />
+          <path d="M2 17 L12 22 L22 17" />
+          <path d="M2 12 L12 17 L22 12" />
         </svg>
       );
     default:
