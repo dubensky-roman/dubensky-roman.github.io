@@ -2574,8 +2574,120 @@ const CASES = [
     },
   },
   {
-    id: "osint",
+    id: "inveron",
     num: "03",
+    title: "INVERON Console",
+    titleBright: "Energy",
+    titleDim: "Management Platform",
+    subtitle: "Energy management platform for inverter providers",
+    year: "2026",
+    role: "Product Designer",
+    scope: "Enterprise · Web · B2B+B2C",
+    duration: "In development",
+    tags: ["Enterprise", "SaaS", "Energy"],
+    pills: ["Enterprise SaaS", "Multi-tenant", "Role-based Access", "Real-time Monitoring"],
+    brief: "Ukrainian inverter providers relied on Chinese OEM software — no security, no localization, no usability. INVERON replaces it with a multi-tenant energy management console built for three simultaneous audiences: homeowners who just want status, technicians who need raw data, and distributors who manage entire organizational hierarchies.",
+    accent: "oklch(0.55 0.18 250)",
+    cover: "cool",
+    comingSoon: false,
+    stats: [
+      { value: "3", label: "User roles" },
+      { value: "Full cycle", label: "Research → UI" },
+      { value: "2026", label: "Target launch" },
+      { value: "In dev", label: "Status" },
+    ],
+    sections: {
+      overviewTitle: "One platform for every audience",
+      overviewBody:
+        "INVERON is an energy management console for monitoring inverters and solar generation across large device networks. The platform was designed to serve three fundamentally different user groups simultaneously — homeowners checking battery status, technical specialists analyzing energy flows, and distributors overseeing entire client hierarchies — all within a single coherent system.",
+      roles: [
+        {
+          num: "01",
+          title: "Distributor",
+          desc: "Manages sub-organizations and their users independently. Full visibility across the entire client tree with organizational hierarchy controls.",
+          access: "Full hierarchy access",
+          level: "full",
+        },
+        {
+          num: "02",
+          title: "Technical Specialist",
+          desc: "Monitors device status, energy flows, events history, and raw analytics. Access to list and grid views with advanced filtering.",
+          access: "Technical access",
+          level: "mid",
+        },
+        {
+          num: "03",
+          title: "Homeowner",
+          desc: "Sees device status, battery level, and basic consumption data. Clean, non-technical interface that surfaces what matters without overwhelming.",
+          access: "Standard access",
+          level: "limited",
+        },
+      ],
+      problemTitle: "OEM software built for engineers, used by everyone",
+      problemBody:
+        "Before INVERON, providers handed clients a Chinese OEM application bundled with the inverter hardware. It had no localization, no access control, and transmitted all device data without encryption. Technical users tolerated it. Everyone else was lost.",
+      challenges: [
+        {
+          title: "No security layer",
+          desc: "The incumbent OEM app transmitted all device data openly — no authentication architecture, no role separation, no audit trail.",
+          icon: "lock",
+        },
+        {
+          title: "Three audiences, one complexity level",
+          desc: "A homeowner checking battery status and a technician debugging energy flows have nothing in common — yet the old system treated them identically.",
+          icon: "users",
+        },
+        {
+          title: "No distribution model",
+          desc: "Providers had no way to manage client organizations independently. Every onboarding and support request went through the vendor.",
+          icon: "bell",
+        },
+      ],
+      constraint:
+        "The platform had to feel simple enough for a homeowner while retaining the full technical depth that specialists require — without building two separate products.",
+      researchTitle: "Mapping three user models",
+      researchBody: [
+        "The core design challenge was serving three audiences with fundamentally different mental models and information needs within a single interface. I mapped each role's primary jobs-to-be-done and identified where complexity should be surfaced and where it should be hidden.",
+        "This led to a layered information architecture: a shared navigation shell with role-filtered content depth, and view-mode toggles (grid vs list) that let technical users access the density they need without forcing it on everyone.",
+      ],
+      insight:
+        "A homeowner should never see a power flow diagram they didn't ask for. A technician should never lose access to raw data behind a simplified UI. The solution is the same interface with different defaults — not different products.",
+      processTitle: "From audit to production-ready UI",
+      process: [
+        { num: "01", title: "Competitor audit", desc: "Analyzed the OEM software and comparable energy management tools to identify baseline expectations and critical gaps in usability and security." },
+        { num: "02", title: "User role definition", desc: "Defined three distinct user personas with separate access levels, information needs, and interaction patterns. This shaped every IA decision." },
+        { num: "03", title: "Information architecture", desc: "Designed the navigation structure and content hierarchy for all three roles. Key decision: one URL structure, role-filtered content depth." },
+        { num: "04", title: "Wireframes & flows", desc: "Mapped core flows: device onboarding, real-time monitoring, organizational hierarchy management, and event history." },
+        { num: "05", title: "UI design & hand-off", desc: "Hi-fidelity screens in Figma covering all major surfaces. Component library built for developer hand-off, currently in active development." },
+      ],
+      designTitle: "Key design decisions",
+      features: [
+        { kind: "core", title: "Grid / List toggle", desc: "Technical specialists can switch between a data-dense list view and a card grid. Both views expose the same data — the difference is density and scannability." },
+        { kind: "unique", title: "Organizational hierarchy", desc: "Distributors manage a tree of sub-organizations independently. Each node has its own users, roles, and device scope — without requiring vendor involvement." },
+        { kind: "core", title: "Real-time energy dashboard", desc: "Consumption, generation, battery level, and grid status visualized in one view. Power flow diagram surfaces the relationships between sources at a glance." },
+        { kind: "unique", title: "Role-based access architecture", desc: "Three access levels with different content depth — not different apps. A homeowner sees clean status cards; a specialist sees the same device with full analytics." },
+      ],
+      statusTitle: "In active development",
+      statusNote:
+        "Designed for a major Ukrainian state organization and a commercial distributor as first clients. Full UI system delivered to the development team — currently in active build phase.",
+      results: [
+        { title: "3 user roles", desc: "Distributor, specialist, and homeowner — all served by one interface with role-filtered content depth." },
+        { title: "OEM replaced", desc: "Chinese vendor software with no security or localization — replaced by a purpose-built platform with proper access control." },
+        { title: "Multi-tenant architecture", desc: "Self-service distribution model: providers manage their own client organizations without vendor involvement." },
+        { title: "2026 launch", desc: "Currently in active development with a major state organization as the first production client." },
+      ],
+      reflectionTitle: "On designing for complexity without showing it",
+      reflectionBody: [
+        "The hardest part of INVERON wasn't the visual design — it was the information architecture decision to serve three audiences from a single interface. Every screen had to answer: who is likely to see this, and what do they need to act on?",
+        "If I could revisit one decision, it would be the homeowner onboarding flow. We prioritized the technical architecture first and simplified the homeowner view from the top down. Designing that entry experience from the homeowner's perspective first would have surfaced constraints earlier in the process.",
+      ],
+      reflectionQuote:
+        "The simplest interface for the end user usually requires the most design work to get right — the complexity doesn't disappear, it just moves upstream.",
+    },
+  },
+  {
+    id: "osint",
+    num: "04",
     title: "OSINT",
     titleBright: "OSINT",
     titleDim: "Platform",
