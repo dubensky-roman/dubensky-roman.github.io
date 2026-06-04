@@ -524,12 +524,15 @@ button {
   gap: 8px;
 }
 .case-card-top .badge.soon { color: rgba(241,238,232,0.65); }
-.case-card-top .badge.soon .dot {
+.case-card-top .badge.soon .dot,
+.case-card-top .badge.active .dot {
   width: 8px; height: 8px;
-  background: oklch(0.75 0.14 90);
   border-radius: 50%;
   display: inline-block;
 }
+.case-card-top .badge.soon .dot { background: oklch(0.75 0.14 90); }
+.case-card-top .badge.active { color: rgba(241,238,232,0.65); }
+.case-card-top .badge.active .dot { background: oklch(0.72 0.18 145); }
 
 .case-card-title {
   margin: 0;
@@ -3554,8 +3557,12 @@ function CaseCard({ c, index, onOpen }) {
             <b>{c.num}</b>
             <span>/ {c.year}</span>
           </span>
-          {(c.comingSoon || c.inProgress) ? (
+          {c.comingSoon ? (
             <span className="badge soon">
+              <span className="dot"></span>In progress
+            </span>
+          ) : c.inProgress ? (
+            <span className="badge active">
               <span className="dot"></span>In progress
             </span>
           ) : (
