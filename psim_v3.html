@@ -1,0 +1,1602 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=1920">
+  <title>PSIM — Моніторинг</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #f4f4f4;
+      --white:     #ffffff;
+      --surface:   #fafafa;
+      --border:    #e5e7ed;
+      --text-1:    #2e2f31;
+      --text-2:    #4c4c4d;
+      --text-3:    #9fa4af;
+      --avatar-bg: #393a3b;
+      --green:     #49a64e;
+      --green-b:   #58c35e;
+      --green-dim: rgba(88,195,94,0.2);
+      --red:       #d30c1b;
+      --red-dim:   rgba(255,14,33,0.2);
+      --red-cam:   #ff9fa7;
+      --crimson:   #a20915;
+      --orange:    #df710b;
+      --orange-dim:rgba(223,113,11,0.2);
+    }
+
+    html, body {
+      min-width: 1920px;
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text-1);
+      font-family: 'Roboto', system-ui, sans-serif;
+      font-size: 14px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── NAV ─────────────────────────────────── */
+    .nav {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      min-width: 1920px;
+      height: 72px;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      z-index: 10;
+      box-shadow: 0 1px 0 var(--border);
+    }
+    .nav-logo img { height: 36px; display: block; }
+    .nav-logo-fallback {
+      font-size: 20px; font-weight: 700; color: var(--text-1);
+      letter-spacing: -0.5px;
+    }
+    .nav-tabs {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+    .nav-tab {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: var(--text-2);
+      font-size: 14px;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    .nav-tab:hover { background: #ebebeb; }
+    .nav-tab.active { background: var(--bg); }
+    .nav-tab svg { width: 20px; height: 20px; flex-shrink: 0; }
+    .nav-tab .chevron { width: 12px; height: 12px; opacity: 0.5; }
+    .nav-actions { display: flex; gap: 12px; align-items: center; }
+    .icon-btn {
+      width: 36px; height: 36px;
+      background: var(--surface);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .icon-btn:hover { background: #ebebeb; transform: scale(1.05); }
+    .icon-btn svg { width: 20px; height: 20px; }
+
+    /* ── NAV DROPDOWN ────────────────────────── */
+    .nav-tab-wrap {
+      position: relative;
+    }
+    .nav-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 4px);
+      left: 0;
+      background: var(--white);
+      border-radius: 8px;
+      padding: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.10);
+      z-index: 200;
+      flex-direction: column;
+      gap: 0;
+      min-width: 180px;
+    }
+    .nav-tab-wrap:hover .nav-dropdown { display: flex; }
+    .nav-dropdown.wide { min-width: 268px; }
+    .dropdown-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-2);
+      white-space: nowrap;
+      transition: background 0.12s;
+      text-decoration: none;
+    }
+    .dropdown-item:hover { background: var(--bg); }
+    .dropdown-item.active { background: #efedec; }
+    .dropdown-item img { width: 24px; height: 24px; flex-shrink: 0; }
+
+    /* ── PAGE LAYOUT ─────────────────────────── */
+    .page {
+      position: absolute;
+      top: 72px; left: 0;
+      width: 100%;
+      min-width: 1920px;
+      height: calc(100% - 72px);
+      display: flex;
+      align-items: stretch;
+      padding: 12px;
+      gap: 12px;
+      overflow: hidden;
+    }
+    .main-content {
+      flex: 0 0 1416px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-height: 0;
+      overflow: hidden;
+    }
+    .sidebar {
+      flex: 1;
+      min-width: 468px;
+      background: var(--white);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+      overflow: hidden;
+    }
+
+    /* ── PANELS ─────────────────────────────── */
+    .panel {
+      background: var(--white);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .panel-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text-1);
+      white-space: nowrap;
+    }
+    .panel-actions { display: flex; gap: 4px; align-items: center; }
+    .panel-icon-btn {
+      width: 32px; height: 32px;
+      background: var(--surface);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      flex-shrink: 0;
+    }
+    .panel-icon-btn:hover { background: #ebebeb; transform: scale(1.05); }
+    .panel-icon-btn svg { width: 20px; height: 20px; }
+
+    /* ── CAMERA SECTION ──────────────────────── */
+    .camera-panel { padding: 12px 16px; }
+    .camera-panel-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .camera-panel-title {
+      font-size: 20px; font-weight: 700; color: var(--text-1);
+    }
+    .camera-grid {
+      display: flex;
+      gap: 16px;
+    }
+    .camera-card {
+      flex: 0 0 334px;
+      height: 400px;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+    .camera-card.rejected {
+      border: 1.1px solid var(--text-1);
+      box-shadow: 0 2px 18px rgba(0,0,0,0.1);
+    }
+    .camera-img-wrap {
+      position: absolute;
+      inset: 0;
+    }
+    .camera-img-wrap img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s cubic-bezier(0.25,0,0,1);
+    }
+    .camera-card:hover .camera-img-wrap img { transform: scale(1.04); }
+    .camera-no-photo {
+      position: absolute; inset: 0;
+      background: var(--avatar-bg);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .camera-no-photo svg { width: 120px; height: 120px; opacity: 0.25; fill: #fff; }
+    .camera-header {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 11px 18px;
+      background: rgba(46,47,49,0.6);
+      color: #fff;
+      font-size: 15.6px;
+      font-weight: 500;
+      z-index: 2;
+    }
+    .camera-footer {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 22px 0;
+      z-index: 2;
+    }
+    .camera-badge {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      justify-content: center;
+      width: 183px;
+      padding: 7px 13px;
+      border-radius: 999px;
+      font-size: 15.6px;
+      font-weight: 900;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .camera-badge.verified {
+      background: var(--green);
+      border: 1.1px solid var(--green-b);
+      color: #fff;
+    }
+    .camera-badge.rejected-cam {
+      background: var(--red-cam);
+      border: 1.1px solid var(--red);
+      color: var(--red);
+    }
+    .camera-badge svg { width: 22px; height: 22px; flex-shrink: 0; }
+    .camera-hover-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 3;
+    }
+    .camera-card:hover .camera-hover-overlay { opacity: 1; }
+    .camera-action-btn {
+      background: rgba(255,255,255,0.92);
+      color: var(--text-1);
+      border: none;
+      border-radius: 6px;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: 'Roboto', sans-serif;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+    .camera-action-btn:hover { background: #fff; transform: scale(1.03); }
+
+    /* ── ACTIVITY STRIP ─────────────────────── */
+    .activity-strip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 40px;
+      padding: 0 4px;
+      flex-shrink: 0;
+      background: var(--white);
+      border-radius: 8px;
+    }
+    .activity-label {
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-2);
+      white-space: nowrap;
+      flex-shrink: 0;
+      padding-left: 12px;
+    }
+    .activity-scroll {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      overflow-x: auto;
+      scrollbar-width: none;
+      cursor: grab;
+      user-select: none;
+      flex: 1;
+    }
+    .activity-scroll::-webkit-scrollbar { display: none; }
+    .activity-scroll.grabbing { cursor: grabbing; }
+    .activity-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 8px;
+      white-space: nowrap;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: background 0.12s;
+    }
+    .activity-chip:hover { background: var(--bg); }
+    .activity-chip-name {
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-3);
+    }
+    .activity-chip-time {
+      background: var(--text-3);
+      border-radius: 30px;
+      padding: 3px 6px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    /* ── BOTTOM PANELS ───────────────────────── */
+    .bottom-panels {
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      gap: 12px;
+    }
+    .bottom-panel {
+      flex: 1;
+      min-height: 0;
+      background: var(--white);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── PERSON LIST (shared) ───────────────── */
+    .person-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #d0d3db transparent;
+    }
+    .person-list::-webkit-scrollbar { width: 4px; }
+    .person-list::-webkit-scrollbar-track { background: transparent; }
+    .person-list::-webkit-scrollbar-thumb { background: #d0d3db; border-radius: 2px; }
+    .person-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      transition: background 0.15s;
+      cursor: pointer;
+    }
+    .person-row:hover { background: #f9f9fb; }
+    .person-row:last-child { border-bottom: none; }
+    .avatar {
+      width: 44px; height: 52px;
+      border-radius: 4px;
+      overflow: hidden;
+      flex-shrink: 0;
+      position: relative;
+      background: var(--avatar-bg);
+    }
+    .avatar img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .avatar-placeholder {
+      position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .avatar-placeholder svg { width: 28px; height: 28px; fill: rgba(255,255,255,0.25); }
+    .person-info { flex: 1; min-width: 0; }
+    .person-name {
+      font-size: 16px; font-weight: 500;
+      color: var(--text-1);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      line-height: 1.25;
+    }
+    .person-name .vip { color: #f59e0b; margin-right: 4px; }
+    .person-sub {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      font-size: 14px;
+      font-weight: 400;
+      color: var(--text-3);
+      white-space: nowrap;
+      line-height: 1;
+      margin-top: 2px;
+    }
+    .person-sub .sep { opacity: 0.5; }
+    .person-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+    .person-time {
+      font-size: 12px;
+      font-weight: 400;
+      color: var(--text-3);
+    }
+
+    /* ── BADGES ────────────────────────────── */
+    .badge {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 12px;
+      border-radius: 999px;
+      border: 1px solid;
+      font-size: 10px;
+      font-weight: 500;
+      white-space: nowrap;
+    }
+    .badge svg { width: 12px; height: 12px; flex-shrink: 0; }
+    .badge-lg { font-size: 12px; padding: 4px 8px; }
+    .badge-lg svg { width: 16px; height: 16px; }
+    .badge--red {
+      background: var(--red-dim); border-color: var(--red);
+      color: var(--red);
+    }
+    .badge--crimson {
+      background: var(--crimson); border-color: var(--red);
+      color: #fff;
+    }
+    .badge--green {
+      background: var(--green-dim); border-color: var(--green-b);
+      color: var(--green-b);
+    }
+    .badge--orange {
+      background: var(--orange-dim); border-color: var(--orange);
+      color: var(--orange);
+    }
+    .badge--verified-list {
+      background: var(--green); border-color: var(--green-b);
+      color: #fff;
+    }
+
+    /* ── EVENT LOG (SIDEBAR) ──────────────── */
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .sidebar-title { font-size: 20px; font-weight: 700; color: var(--text-1); }
+    .sidebar-actions { display: flex; gap: 4px; align-items: center; }
+    .view-toggle {
+      display: flex;
+      align-items: center;
+      background: var(--surface);
+      border-radius: 999px;
+      padding: 2px;
+    }
+    .view-btn {
+      display: flex; align-items: center; justify-content: center;
+      padding: 4px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .view-btn.active {
+      background: var(--white);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .view-btn svg { width: 20px; height: 20px; }
+    .log-list {
+      flex: 1;
+      min-height: 0;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #d0d3db transparent;
+    }
+    .log-list::-webkit-scrollbar { width: 4px; }
+    .log-list::-webkit-scrollbar-track { background: transparent; }
+    .log-list::-webkit-scrollbar-thumb { background: #d0d3db; border-radius: 2px; }
+    .log-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 16px;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .log-row:hover { background: #f9f9fb; }
+    .log-row:last-child { border-bottom: none; }
+    .log-avatar {
+      width: 44px; height: 52px;
+      border-radius: 4px;
+      overflow: hidden;
+      flex-shrink: 0;
+      background: var(--avatar-bg);
+      position: relative;
+    }
+    .log-avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .log-info { flex: 1; min-width: 0; }
+    .log-name {
+      font-size: 16px; font-weight: 500;
+      color: var(--text-1);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      line-height: 1.25;
+    }
+    .log-sub {
+      display: flex; gap: 6px; align-items: center;
+      font-size: 13px; font-weight: 400;
+      color: var(--text-3);
+      white-space: nowrap;
+      line-height: 1;
+      margin-top: 2px;
+    }
+    .log-right {
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 4px; flex-shrink: 0;
+    }
+    .log-time { font-size: 12px; color: var(--text-3); }
+
+    /* ── ROW HOVER ACTIONS ───────────────────── */
+    .person-row,
+    .log-row {
+      position: relative;
+      overflow: hidden;
+    }
+    .row-actions {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      background: var(--white);
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0 16px;
+      transform: translateX(100%);
+      transition: transform 0.18s cubic-bezier(0.25, 0, 0, 1);
+      pointer-events: none;
+    }
+    .person-row:hover .row-actions,
+    .log-row:hover .row-actions {
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+    .row-action-btn {
+      width: 40px; height: 40px;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 50%;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: background 0.12s;
+      flex-shrink: 0;
+    }
+    .row-action-btn:hover { background: var(--bg); }
+    .row-action-btn svg { width: 24px; height: 24px; display: block; }
+    .row-action-pill {
+      height: 40px;
+      background: var(--surface);
+      border: none;
+      border-radius: 999px;
+      padding: 0 16px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-1);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: background 0.12s;
+    }
+    .row-action-pill:hover { background: #ebebeb; }
+  </style>
+</head>
+<body>
+
+<!-- ── NAV ────────────────────────────────────────── -->
+<nav class="nav">
+  <div class="nav-logo">
+    <img src="gleit-logo.png" alt="GLeit">
+  </div>
+
+  <div class="nav-tabs">
+    <!-- Моніторинг -->
+    <div class="nav-tab-wrap">
+      <div class="nav-tab active">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/></svg>
+        Моніторинг
+        <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg>
+      </div>
+      <div class="nav-dropdown">
+        <div class="dropdown-item active">
+          <img src="https://www.figma.com/api/mcp/asset/d4d401c4-802b-4a98-9852-a390648575c6" alt="">
+          Інфопанель точки пропуску
+        </div>
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/23720a25-2801-45b0-a661-499198ab6618" alt="">
+          Відеостіна приладів
+        </div>
+      </div>
+    </div>
+    <!-- Персони -->
+    <div class="nav-tab-wrap">
+      <div class="nav-tab">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 2.75c1.24 0 2.25 1.01 2.25 2.25S13.24 11.25 12 11.25 9.75 10.24 9.75 9 10.76 6.75 12 6.75zM17 17H7v-.75c0-1.66 3.33-2.5 5-2.5s5 .84 5 2.5V17z"/></svg>
+        Персони
+        <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg>
+      </div>
+      <div class="nav-dropdown">
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/cf303d9b-832b-42c6-b6f5-13efd49c2c5a" alt="">
+          Гостьові заявки
+        </div>
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/b4fa1a05-84d8-441e-b197-bae1d49e8c61" alt="">
+          Управління користувачами
+        </div>
+      </div>
+    </div>
+    <!-- Територія -->
+    <div class="nav-tab-wrap">
+      <div class="nav-tab">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+        Територія
+        <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg>
+      </div>
+      <div class="nav-dropdown">
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/95672454-f01a-4e3a-bf06-70e065c5bd57" alt="">
+          Співробітники на території
+        </div>
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/d42691fe-7771-4c24-9473-150206a90214" alt="">
+          Машини на території
+        </div>
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/e598855f-f262-4756-bff6-e47f22d0c78a" alt="">
+          Дозвіл машин на території
+        </div>
+      </div>
+    </div>
+    <!-- Адміністрування -->
+    <div class="nav-tab-wrap">
+      <div class="nav-tab">
+        <svg viewBox="0 0 20 20" fill="currentColor" style="width:20px;height:20px"><path d="M14.1673 18.3327C13.0145 18.3327 12.032 17.9263 11.2198 17.1135C10.4076 16.3007 10.0012 15.3182 10.0007 14.166C10.0001 13.0138 10.4065 12.0313 11.2198 11.2185C12.0332 10.4057 13.0157 9.99935 14.1673 9.99935C15.319 9.99935 16.3018 10.4057 17.1157 11.2185C17.9295 12.0313 18.3357 13.0138 18.334 14.166C18.3323 15.3182 17.9259 16.301 17.1148 17.1143C16.3037 17.9277 15.3212 18.3338 14.1673 18.3327ZM10.0007 18.3327C8.0701 17.8466 6.47621 16.7388 5.21898 15.0093C3.96176 13.2799 3.33343 11.3599 3.33398 9.24935V4.16602L10.0007 1.66602L16.6673 4.16602V8.89518C16.3062 8.71463 15.8998 8.57574 15.4482 8.47852C14.9965 8.38129 14.5695 8.33268 14.1673 8.33268C12.5562 8.33268 11.1812 8.90213 10.0423 10.041C8.90343 11.1799 8.33398 12.5549 8.33398 14.166C8.33398 15.0271 8.49732 15.8049 8.82399 16.4993C9.15065 17.1938 9.56371 17.798 10.0632 18.3118C10.0493 18.3118 10.039 18.3155 10.0323 18.3227C10.0257 18.3299 10.0151 18.3332 10.0007 18.3327ZM15.0532 13.8018C15.2959 13.5585 15.4173 13.2632 15.4173 12.916C15.4173 12.5688 15.2959 12.2738 15.0532 12.031C14.8104 11.7882 14.5151 11.6666 14.1673 11.666C13.8195 11.6655 13.5245 11.7871 13.2823 12.031C13.0401 12.2749 12.9184 12.5699 12.9173 12.916C12.9162 13.2621 13.0379 13.5574 13.2823 13.8018C13.5268 14.0463 13.8218 14.1677 14.1673 14.166C14.5129 14.1643 14.8082 14.043 15.0532 13.8018ZM14.1673 16.666C14.5979 16.666 14.9937 16.5652 15.3548 16.3635C15.7159 16.1618 16.0076 15.8946 16.2298 15.5618C15.9243 15.3813 15.5979 15.2424 15.2507 15.1452C14.9034 15.048 14.5423 14.9993 14.1673 14.9993C13.7923 14.9993 13.4312 15.048 13.084 15.1452C12.7368 15.2424 12.4104 15.3813 12.1048 15.5618C12.327 15.8952 12.6187 16.1627 12.9798 16.3643C13.3409 16.566 13.7368 16.6666 14.1673 16.666Z"/></svg>
+        Адміністрування
+        <svg class="chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4l4 4 4-4"/></svg>
+      </div>
+      <div class="nav-dropdown wide">
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/6544bb6c-dcd5-4b85-bb16-138ea4180029" alt="">
+          Конфігурація точок пропуску
+        </div>
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/605cc934-1158-4e51-a8d0-710cf72cd3c2" alt="">
+          Підсистеми - давачі даних
+        </div>
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/04591af6-a161-479c-8446-b701170d05cf" alt="">
+          Журнал подій
+        </div>
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/6baa4586-de8c-43c5-a975-6ce1d6f5b888" alt="">
+          Повноваження за ролями
+        </div>
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/2628de12-4b39-484e-90dc-242fdd920170" alt="">
+          Мапи території
+        </div>
+        <div class="dropdown-item">
+          <img src="https://www.figma.com/api/mcp/asset/4fbd823d-2ccb-44ae-9e47-56cfc0498bb7" alt="">
+          Конфігурація організацій
+        </div>
+      </div>
+    </div>
+    <!-- Допомога -->
+    <div class="nav-tab">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+      Допомога
+    </div>
+  </div>
+
+  <div class="nav-actions">
+    <div class="icon-btn" title="Сповіщення">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+    </div>
+    <div class="icon-btn" title="Профіль">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+    </div>
+  </div>
+</nav>
+
+<!-- ── PAGE ────────────────────────────────────────── -->
+<div class="page">
+
+  <!-- ── MAIN CONTENT ──────────────────────────────── -->
+  <div class="main-content">
+
+    <!-- Camera Section -->
+    <div class="panel camera-panel">
+      <div class="camera-panel-header">
+        <h2 class="camera-panel-title">Інфопанель точки пропуску</h2>
+        <div class="panel-actions">
+          <div class="panel-icon-btn" title="Пошук">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+          </div>
+          <div class="panel-icon-btn" title="Налаштування">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+          </div>
+        </div>
+      </div>
+      <div class="camera-grid">
+
+        <!-- Camera 1 — Рецепшн — VERIFIED -->
+        <div class="camera-card">
+          <div class="camera-img-wrap">
+            <img src="https://www.figma.com/api/mcp/asset/81f7f312-2e3f-4673-a904-0e479ac208ff" alt="Рецепшн">
+          </div>
+          <div class="camera-header"><span>Рецепшн</span><span>13:24</span></div>
+          <div class="camera-footer">
+            <div class="camera-badge verified">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+              ВЕРИФІКОВАНО
+            </div>
+          </div>
+          <div class="camera-hover-overlay">
+            <button class="camera-action-btn">Переглянути</button>
+          </div>
+        </div>
+
+        <!-- Camera 2 — Парадні двері — REJECTED (no photo) -->
+        <div class="camera-card rejected">
+          <div class="camera-no-photo">
+            <svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+          </div>
+          <div class="camera-header"><span>Парадні двері</span><span>13:57</span></div>
+          <div class="camera-footer">
+            <div class="camera-badge rejected-cam">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+              ВІДХИЛЕНО
+            </div>
+          </div>
+          <div class="camera-hover-overlay">
+            <button class="camera-action-btn">Переглянути</button>
+          </div>
+        </div>
+
+        <!-- Camera 3 — Парадні двері (Bagland) — VERIFIED -->
+        <div class="camera-card">
+          <div class="camera-img-wrap">
+            <img src="https://www.figma.com/api/mcp/asset/7bf4099d-d735-4520-9a4b-eb5cc5472c28" alt="Парадні двері (Bagland)">
+          </div>
+          <div class="camera-header"><span>Парадні двері (Bagland)</span><span>13:25</span></div>
+          <div class="camera-footer" style="opacity:0.5">
+            <div class="camera-badge verified">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+              ВЕРИФІКОВАНО
+            </div>
+          </div>
+          <div class="camera-hover-overlay">
+            <button class="camera-action-btn">Переглянути</button>
+          </div>
+        </div>
+
+        <!-- Camera 4 — Пожежний вихід — VERIFIED -->
+        <div class="camera-card">
+          <div class="camera-img-wrap">
+            <img src="camera-fire-exit.png" alt="Пожежний вихід">
+          </div>
+          <div class="camera-header"><span>Пожежний вихід</span><span>13:36</span></div>
+          <div class="camera-footer">
+            <div class="camera-badge verified">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+              ВЕРИФІКОВАНО
+            </div>
+          </div>
+          <div class="camera-hover-overlay">
+            <button class="camera-action-btn">Переглянути</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Activity Strip -->
+    <div class="activity-strip">
+      <span class="activity-label">Активність:</span>
+      <div class="activity-scroll" id="activityScroll">
+        <div class="activity-chip"><span class="activity-chip-name">Парадні двері (Bagland)</span><span class="activity-chip-time">13:24</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Парадні двері</span><span class="activity-chip-time">13:23</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Рецепшн</span><span class="activity-chip-time">13:24</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Парадні двері</span><span class="activity-chip-time">13:22</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Рецепшн</span><span class="activity-chip-time">13:21</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Пожежний вихід</span><span class="activity-chip-time">13:20</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Парадні двері</span><span class="activity-chip-time">13:19</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Рецепшн</span><span class="activity-chip-time">13:18</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Парадні двері (Bagland)</span><span class="activity-chip-time">13:17</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Парадні двері</span><span class="activity-chip-time">13:16</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Рецепшн</span><span class="activity-chip-time">13:15</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Пожежний вихід</span><span class="activity-chip-time">13:14</span></div>
+        <div class="activity-chip"><span class="activity-chip-name">Парадні двері (Bagland)</span><span class="activity-chip-time">13:13</span></div>
+      </div>
+    </div>
+
+    <!-- Bottom Panels -->
+    <div class="bottom-panels">
+
+      <!-- Special Attention -->
+      <div class="bottom-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Особлива увага</h3>
+          <div class="panel-actions">
+            <div class="panel-icon-btn" title="Додатково">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="person-list">
+          <!-- Row 1 — ВІДХИЛЕНО -->
+          <div class="person-row">
+            <div class="avatar">
+              <div class="avatar-placeholder"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+            </div>
+            <div class="person-info">
+              <div class="person-name">Невідома особа</div>
+              <div class="person-sub"><span>Невідомо</span><span class="sep">|</span><span>Парадні двері</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge--red">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+                ВІДХИЛЕНО
+              </span>
+              <span class="person-time">15 хв. назад</span>
+            </div>
+          </div>
+          <!-- Row 2 — ВІДХИЛЕНО -->
+          <div class="person-row">
+            <div class="avatar">
+              <div class="avatar-placeholder"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+            </div>
+            <div class="person-info">
+              <div class="person-name">Невідома особа</div>
+              <div class="person-sub"><span>Невідомо</span><span class="sep">|</span><span>Парадні двері</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge--red">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+                ВІДХИЛЕНО
+              </span>
+              <span class="person-time">15 хв. назад</span>
+            </div>
+          </div>
+          <!-- Row 3 — ЗАЙШЛА ОСОБА -->
+          <div class="person-row">
+            <div class="avatar">
+              <div class="avatar-placeholder"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+            </div>
+            <div class="person-info">
+              <div class="person-name">Невідома особа</div>
+              <div class="person-sub"><span>Невідомо</span><span class="sep">|</span><span>Парадні двері</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge--crimson">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                ЗАЙШЛА ОСОБА
+              </span>
+              <span class="person-time">24 хв. назад</span>
+            </div>
+          </div>
+          <!-- Row 4 — ЗАЙШЛА ОСОБА -->
+          <div class="person-row">
+            <div class="avatar">
+              <div class="avatar-placeholder"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+            </div>
+            <div class="person-info">
+              <div class="person-name">Невідома особа</div>
+              <div class="person-sub"><span>Невідомо</span><span class="sep">|</span><span>Рецепшн</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge--crimson">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                ЗАЙШЛА ОСОБА
+              </span>
+              <span class="person-time">24 хв. назад</span>
+            </div>
+          </div>
+          <!-- Row 5 — ЗАЙШЛА ОСОБА -->
+          <div class="person-row">
+            <div class="avatar">
+              <div class="avatar-placeholder"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+            </div>
+            <div class="person-info">
+              <div class="person-name">Невідома особа</div>
+              <div class="person-sub"><span>Невідомо</span><span class="sep">|</span><span>Пожежний вихід</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge--crimson">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                ЗАЙШЛА ОСОБА
+              </span>
+              <span class="person-time">31 хв. назад</span>
+            </div>
+          </div>
+          <!-- Row 6 — ВІДХИЛЕНО -->
+          <div class="person-row">
+            <div class="avatar">
+              <div class="avatar-placeholder"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+            </div>
+            <div class="person-info">
+              <div class="person-name">Невідома особа</div>
+              <div class="person-sub"><span>Невідомо</span><span class="sep">|</span><span>Парадні двері (Bagland)</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge--red">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+                ВІДХИЛЕНО
+              </span>
+              <span class="person-time">38 хв. назад</span>
+            </div>
+          </div>
+          <!-- Row 7 — ЗАЙШЛА ОСОБА -->
+          <div class="person-row">
+            <div class="avatar">
+              <div class="avatar-placeholder"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+            </div>
+            <div class="person-info">
+              <div class="person-name">Невідома особа</div>
+              <div class="person-sub"><span>Невідомо</span><span class="sep">|</span><span>Рецепшн</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge--crimson">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                ЗАЙШЛА ОСОБА
+              </span>
+              <span class="person-time">44 хв. назад</span>
+            </div>
+          </div>
+          <!-- Row 8 — ВІДХИЛЕНО -->
+          <div class="person-row">
+            <div class="avatar">
+              <div class="avatar-placeholder"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+            </div>
+            <div class="person-info">
+              <div class="person-name">Невідома особа</div>
+              <div class="person-sub"><span>Невідомо</span><span class="sep">|</span><span>Парадні двері</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge--red">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+                ВІДХИЛЕНО
+              </span>
+              <span class="person-time">51 хв. назад</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Guests -->
+      <div class="bottom-panel">
+        <div class="panel-header">
+          <h3 class="panel-title">Гості сьогодні</h3>
+          <div class="panel-actions">
+            <div class="panel-icon-btn" title="Пошук">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            </div>
+            <div class="panel-icon-btn" title="Фільтр">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.25 5.61C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39c.51-.66.04-1.61-.79-1.61H5.04c-.83 0-1.3.95-.79 1.61z"/></svg>
+            </div>
+            <div class="panel-icon-btn" title="Додатково">
+              <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>
+            </div>
+          </div>
+        </div>
+        <div class="person-list">
+          <!-- VIP — ПРИБУВ -->
+          <div class="person-row">
+            <div class="person-info">
+              <div class="person-name">
+                <span class="vip">★</span>Тимошенко Григорій Пастернакович
+              </div>
+              <div class="person-sub"><span>Робоча зустріч</span><span class="sep">|</span><span>Зустрічає: Деребасенко Ф.А.</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge-lg badge--green">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                ПРИБУВ
+              </span>
+            </div>
+          </div>
+          <!-- ПРИБУВ -->
+          <div class="person-row">
+            <div class="person-info">
+              <div class="person-name">Мельниченко Юрій Олегович</div>
+              <div class="person-sub"><span>Робоча зустріч</span><span class="sep">|</span><span>Зустрічає: Дубенський Р.І.</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge-lg badge--green">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                ПРИБУВ
+              </span>
+            </div>
+          </div>
+          <!-- ПРИБУВ -->
+          <div class="person-row">
+            <div class="person-info">
+              <div class="person-name">Захаренко Катерина Сергіївна</div>
+              <div class="person-sub"><span>Нарада</span><span class="sep">|</span><span>Зустрічає: Дубенський Р.І.</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge-lg badge--green">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                ПРИБУВ
+              </span>
+            </div>
+          </div>
+          <!-- ОЧІКУЄТЬСЯ -->
+          <div class="person-row">
+            <div class="person-info">
+              <div class="person-name">Остапенко Борис Михайлович</div>
+              <div class="person-sub"><span>Робоча зустріч</span><span class="sep">|</span><span>Зустрічає: Дубенський Р.І.</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge-lg badge--orange">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+                ОЧІКУЄТЬСЯ
+              </span>
+            </div>
+          </div>
+          <!-- ОЧІКУЄТЬСЯ -->
+          <div class="person-row">
+            <div class="person-info">
+              <div class="person-name">Луценко Вікторія Анатоліївна</div>
+              <div class="person-sub"><span>Ділова зустріч</span><span class="sep">|</span><span>Зустрічає: Деребасенко Ф.А.</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge-lg badge--orange">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+                ОЧІКУЄТЬСЯ
+              </span>
+            </div>
+          </div>
+          <!-- ПРИБУВ -->
+          <div class="person-row">
+            <div class="person-info">
+              <div class="person-name">Іщенко Денис Романович</div>
+              <div class="person-sub"><span>Технічний огляд</span><span class="sep">|</span><span>Зустрічає: Дубенський Р.І.</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge-lg badge--green">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                ПРИБУВ
+              </span>
+            </div>
+          </div>
+          <!-- ОЧІКУЄТЬСЯ -->
+          <div class="person-row">
+            <div class="person-info">
+              <div class="person-name">Проценко Максим Ігорович</div>
+              <div class="person-sub"><span>Нарада</span><span class="sep">|</span><span>Зустрічає: Деребасенко Ф.А.</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge-lg badge--orange">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+                ОЧІКУЄТЬСЯ
+              </span>
+            </div>
+          </div>
+          <!-- ОЧІКУЄТЬСЯ -->
+          <div class="person-row">
+            <div class="person-info">
+              <div class="person-name">Пилипенко Олена Василівна</div>
+              <div class="person-sub"><span>Ділова зустріч</span><span class="sep">|</span><span>Зустрічає: Дубенський Р.І.</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge-lg badge--orange">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+                ОЧІКУЄТЬСЯ
+              </span>
+            </div>
+          </div>
+          <!-- ПРИБУВ -->
+          <div class="person-row">
+            <div class="person-info">
+              <div class="person-name">Марченко Олексій Петрович</div>
+              <div class="person-sub"><span>Робоча зустріч</span><span class="sep">|</span><span>Зустрічає: Деребасенко Ф.А.</span></div>
+            </div>
+            <div class="person-right">
+              <span class="badge badge-lg badge--green">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>
+                ПРИБУВ
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /bottom-panels -->
+  </div><!-- /main-content -->
+
+  <!-- ── SIDEBAR — EVENT LOG ────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <h3 class="sidebar-title">Журнал записів</h3>
+      <div class="sidebar-actions">
+        <div class="panel-icon-btn" title="Пошук">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+        </div>
+        <div class="panel-icon-btn" title="Фільтр">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.25 5.61C6.27 8.2 10 13 10 13v6c0 .55.45 1 1 1h2c.55 0 1-.45 1-1v-6s3.72-4.8 5.74-7.39c.51-.66.04-1.61-.79-1.61H5.04c-.83 0-1.3.95-.79 1.61z"/></svg>
+        </div>
+        <div class="view-toggle">
+          <div class="view-btn active">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 13h2v-2H3v2zm0 4h2v-2H3v2zm0-8h2V7H3v2zm4 4h14v-2H7v2zm0 4h14v-2H7v2zM7 7v2h14V7H7z"/></svg>
+          </div>
+          <div class="view-btn">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path d="M6.66862 14.1682H13.3362V13.7098C13.3362 13.0847 13.0306 12.5883 12.4194 12.2204C11.8082 11.8526 11.0025 11.6684 10.0024 11.6679C9.00226 11.6673 8.1966 11.8515 7.58541 12.2204C6.97422 12.5894 6.66862 13.0858 6.66862 13.7098V14.1682ZM11.18 10.3452C11.5062 10.0185 11.6693 9.62593 11.6693 9.16754C11.6693 8.70914 11.5062 8.31687 11.18 7.99072C10.8539 7.66456 10.4613 7.50121 10.0024 7.50065C9.54344 7.5001 9.15117 7.66345 8.82557 7.99072C8.49997 8.31798 8.33662 8.71025 8.33551 9.16754C8.33439 9.62482 8.49775 10.0174 8.82557 10.3452C9.15339 10.673 9.54566 10.8361 10.0024 10.8344C10.4591 10.8328 10.8517 10.6697 11.18 10.3452ZM3.33485 17.502C2.87646 17.502 2.48419 17.3389 2.15803 17.0127C1.83188 16.6866 1.66852 16.294 1.66797 15.8351V5.83377C1.66797 5.37537 1.83132 4.9831 2.15803 4.65695C2.48474 4.33079 2.87702 4.16744 3.33485 4.16688H5.9602L7.50206 2.5H12.5027L14.0446 4.16688H16.6699C17.1283 4.16688 17.5209 4.33024 17.8476 4.65695C18.1743 4.98366 18.3374 5.37593 18.3368 5.83377V15.8351C18.3368 16.2935 18.1737 16.686 17.8476 17.0127C17.5214 17.3394 17.1289 17.5025 16.6699 17.502H3.33485ZM3.33485 15.8351H16.6699V5.83377H13.2945L11.7735 4.16688H8.23132L6.71029 5.83377H3.33485V15.8351Z"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="log-list">
+
+      <!-- 1 — Тимченко Василь — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Тимченко Василь М.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Пожежний вихід</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">5 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 2 — Корж Надія — REJECTED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Корж Надія В.</div>
+          <div class="log-sub"><span>Невідомо</span><span>|</span><span>Парадні двері</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--red">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+            ВІДХИЛЕНО
+          </span>
+          <span class="log-time">8 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 3 — Власенко Богдан — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Власенко Богдан О.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Рецепшн</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">10 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 4 — Ковальська Оксана — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Ковальська Оксана С.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Парадні двері (Bagland)</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">12 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 5 — Невідома особа — REJECTED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <div class="avatar-placeholder"><svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.25)"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+        </div>
+        <div class="log-info">
+          <div class="log-name">Невідома особа</div>
+          <div class="log-sub"><span>Невідомо</span><span>|</span><span>Парадні двері</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--red">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+            ВІДХИЛЕНО
+          </span>
+          <span class="log-time">15 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 6 — Шевченко Андрій — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Шевченко Андрій В.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Рецепшн</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">18 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 7 — Бондаренко Людмила — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Бондаренко Людмила П.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Пожежний вихід</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">21 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 8 — Невідома особа — REJECTED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <div class="avatar-placeholder"><svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.25)"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+        </div>
+        <div class="log-info">
+          <div class="log-name">Невідома особа</div>
+          <div class="log-sub"><span>Невідомо</span><span>|</span><span>Парадні двері (Bagland)</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--red">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+            ВІДХИЛЕНО
+          </span>
+          <span class="log-time">24 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 9 — Іваненко Роман — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Іваненко Роман Д.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Парадні двері</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">27 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 10 — Зінченко Марина — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Зінченко Марина О.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Рецепшн</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">30 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 11 — Невідома особа — REJECTED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <div class="avatar-placeholder"><svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.25)"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+        </div>
+        <div class="log-info">
+          <div class="log-name">Невідома особа</div>
+          <div class="log-sub"><span>Невідомо</span><span>|</span><span>Парадні двері</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--red">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+            ВІДХИЛЕНО
+          </span>
+          <span class="log-time">35 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 12 — Гончаренко Сергій — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Гончаренко Сергій В.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Парадні двері (Bagland)</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">38 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 13 — Кравченко Тетяна — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1517841905240-472988babdf9?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Кравченко Тетяна М.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Рецепшн</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">42 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 14 — Петренко Михайло — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Петренко Михайло Д.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Парадні двері</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">47 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 15 — Невідома особа — REJECTED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <div class="avatar-placeholder"><svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.25)"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+        </div>
+        <div class="log-info">
+          <div class="log-name">Невідома особа</div>
+          <div class="log-sub"><span>Невідомо</span><span>|</span><span>Пожежний вихід</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--red">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+            ВІДХИЛЕНО
+          </span>
+          <span class="log-time">51 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 16 — Савченко Ірина — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Савченко Ірина О.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Рецепшн</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">55 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 17 — Олійник Василь — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Олійник Василь С.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Парадні двері (Bagland)</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">1 год. тому</span>
+        </div>
+      </div>
+
+      <!-- 18 — Невідома особа — REJECTED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <div class="avatar-placeholder"><svg viewBox="0 0 24 24" fill="rgba(255,255,255,0.25)"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg></div>
+        </div>
+        <div class="log-info">
+          <div class="log-name">Невідома особа</div>
+          <div class="log-sub"><span>Невідомо</span><span>|</span><span>Парадні двері (Bagland)</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--red">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/></svg>
+            ВІДХИЛЕНО
+          </span>
+          <span class="log-time">1 год. 8 хв. тому</span>
+        </div>
+      </div>
+
+      <!-- 19 — Коваленко Дмитро — VERIFIED -->
+      <div class="log-row">
+        <div class="log-avatar">
+          <img src="https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=88&h=104&fit=crop&crop=faces" alt="">
+        </div>
+        <div class="log-info">
+          <div class="log-name">Коваленко Дмитро І.</div>
+          <div class="log-sub"><span>Співробітник</span><span>|</span><span>Рецепшн</span></div>
+        </div>
+        <div class="log-right">
+          <span class="badge badge--verified-list">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23 12l-2.44-2.78.34-3.68-3.61-.82-1.89-3.18L12 3 8.6 1.54 6.71 4.72l-3.61.81.34 3.68L1 12l2.44 2.78-.34 3.69 3.61.82 1.89 3.18L12 21l3.4 1.46 1.89-3.18 3.61-.82-.34-3.68L23 12zm-12.91 4.72L6.44 13l1.42-1.41 2.23 2.23 5.67-5.66 1.42 1.41-7.09 7.15z"/></svg>
+            ВЕРИФІКОВАНО
+          </span>
+          <span class="log-time">1 год. 14 хв. тому</span>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+</div><!-- /page -->
+
+<script>
+  // ── Activity strip drag-to-scroll ──────────────────
+  (function() {
+    const el = document.getElementById('activityScroll');
+    let isDown = false, startX, scrollLeft;
+    el.addEventListener('mousedown', e => {
+      isDown = true;
+      el.classList.add('grabbing');
+      startX = e.pageX - el.offsetLeft;
+      scrollLeft = el.scrollLeft;
+    });
+    document.addEventListener('mouseup', () => {
+      isDown = false;
+      el.classList.remove('grabbing');
+    });
+    el.addEventListener('mouseleave', () => {
+      isDown = false;
+      el.classList.remove('grabbing');
+    });
+    el.addEventListener('mousemove', e => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - el.offsetLeft;
+      const walk = (x - startX) * 1.5;
+      el.scrollLeft = scrollLeft - walk;
+    });
+  })();
+
+  // ── Nav tab click ──────────────────────────────────
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+    });
+  });
+
+  // ── View toggle ────────────────────────────────────
+  document.querySelectorAll('.view-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      btn.closest('.view-toggle').querySelectorAll('.view-btn')
+        .forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // ── Row hover action menus ─────────────────────────
+  (function() {
+    const checkSvg = `<svg viewBox="0 0 24 24" fill="#49a64e" width="24" height="24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
+    const dotsSvg = `<svg viewBox="0 0 24 24" fill="#9fa4af" width="24" height="24"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/></svg>`;
+
+    document.querySelectorAll('.person-row').forEach(row => {
+      const a = document.createElement('div');
+      a.className = 'row-actions';
+      a.innerHTML = `<button class="row-action-btn" title="Підтвердити">${checkSvg}</button><button class="row-action-btn" title="Більше">${dotsSvg}</button>`;
+      row.appendChild(a);
+    });
+
+    document.querySelectorAll('.log-row').forEach(row => {
+      const a = document.createElement('div');
+      a.className = 'row-actions';
+      a.innerHTML = `<button class="row-action-pill">ПЕРЕГЛЯНУТИ</button><button class="row-action-btn" title="Більше">${dotsSvg}</button>`;
+      row.appendChild(a);
+    });
+  })();
+</script>
+</body>
+</html>
