@@ -2484,102 +2484,8 @@ const CASES = [
     ],
   },
   {
-    id: "psim",
-    num: "02",
-    title: "PSIM",
-    titleBright: "PSIM",
-    titleDim: "Security Console",
-    subtitle: "Physical security management platform",
-    year: "2025",
-    role: "Product Designer",
-    scope: "Enterprise · Desktop · B2B",
-    duration: "8 months",
-    tags: ["Enterprise", "Data", "Desktop"],
-    pills: ["Enterprise", "Desktop App", "Access Control", "Operator UX", "B2B"],
-    brief: "Redesigning a physical security management platform from a cluttered legacy interface to a fast, operator-first system. The redesign eliminated a critical bottleneck in the guest pass workflow and restructured information hierarchy across 12 system modules — with every decision justified by implementation cost.",
-    accent: "oklch(0.65 0.14 220)",
-    cover: "cool",
-    inProgress: true,
-    stats: [
-      { value: "~12", label: "System modules" },
-      { value: "Full cycle", label: "Research → UI" },
-      { value: "Solo", label: "Designer role" },
-      { value: "Shipped", label: "Production project" },
-    ],
-    sections: {
-      overviewTitle: "What is PSIM?",
-      overviewBody:
-        "PSIM (Physical Security Information Management) is a platform that unifies camera feeds, access control, alarms and dispatch into a single operator console. The platform is used by security teams managing physical access to facilities — operators work with it in real time, under time pressure, often monitoring multiple access points simultaneously.",
-
-      problemTitle: "A system that slowed people down",
-      problemBody:
-        "When I joined the project, a legacy interface already existed. It was outdated both visually and functionally — but the deeper issue wasn't aesthetic. After conversations with the product owner and the security operators, a critical workflow bottleneck emerged.",
-      challenges: [
-        {
-          icon: "users",
-          title: "Bottleneck at the checkpoint",
-          desc: "The guest pass form was accessible only to the security team — creating a single-department bottleneck for every visitor entry.",
-        },
-        {
-          icon: "search",
-          title: "No fast person lookup",
-          desc: "Finding information about a person at a checkpoint required navigating multiple screens, costing operators critical seconds.",
-        },
-        {
-          icon: "layers",
-          title: "Fragmented information hierarchy",
-          desc: "Responsible employee, access level, and visit history were scattered across the interface with no unified operator view.",
-        },
-      ],
-      constraint:
-        "The redesign had to minimize developer hours due to limited resources and tight delivery deadlines. Every decision had to be justified not just by UX value, but by implementation cost.",
-
-      researchTitle: "Understanding the workflow first",
-      researchBody: [
-        "Before touching any design tool, I interviewed the product owner and end users — security operators who work with the system every day. Their feedback revealed that the bottleneck wasn't just visual; it was a workflow problem embedded in how the system assigned responsibilities.",
-        "I also analyzed established PSIM platforms — Genetec, Lenel — to study interaction patterns for high-density, time-critical interfaces where finding information in seconds matters, not minutes.",
-      ],
-      insight:
-        "The guest request form was the single highest-friction point in the daily workflow. Expanding access to it — and redesigning it for speed — would deliver the highest impact with the lowest implementation cost.",
-
-      processTitle: "From research to final UI",
-      process: [
-        { num: "01", title: "Stakeholder & user interviews", desc: "Talked to the product owner and security operators. Mapped the existing workflow and identified where time was lost at each step." },
-        { num: "02", title: "Competitive analysis", desc: "Studied Genetec, Lenel, and other PSIM platforms to understand established interaction patterns for complex security interfaces." },
-        { num: "03", title: "Wireframes & information architecture", desc: "Restructured navigation and key modules. Focused on reducing cognitive load for operators working under real-time pressure." },
-        { num: "04", title: "Iterative UI design", desc: "Designed hi-fi screens in Figma, presenting iterations to the product owner and collecting feedback from the broader team." },
-        { num: "05", title: "Interactive prototype", desc: "Built a clickable prototype to validate the new guest request flow and access control workflows before engineering handoff." },
-      ],
-
-      designTitle: "Key decisions",
-      features: [
-        { kind: "unique", title: "Distributed guest request access", desc: "Any authorized employee can now initiate a guest request — not just security. This single change eliminated the main workflow bottleneck." },
-        { kind: "unique", title: "Redesigned person search", desc: "The search flow now surfaces responsible employee, access level, and visit history in as few interactions as possible." },
-        { kind: "core", title: "Sectional access passes", desc: "Guests access selected facility areas only — raising the overall security level without adding workflow complexity for operators." },
-        { kind: "core", title: "Resource-constrained decisions", desc: "Every change reused existing components where possible, focusing developer effort only where it delivered the most user value." },
-      ],
-
-      statusTitle: "What changed",
-      statusNote:
-        "After the redesign launched, the team confirmed that the new workflows reduced friction and improved operator confidence during access control events.",
-      results: [
-        { title: "Faster entry process", desc: "Guest and vehicle entry became significantly faster — the security-only bottleneck was eliminated across all checkpoints." },
-        { title: "Distributed workload", desc: "Any authorized employee can now initiate a guest request, distributing responsibility across the organization." },
-        { title: "Instant accountability", desc: "Operators can immediately identify who is responsible for any visitor — name, role, and access level visible at a glance." },
-        { title: "Sectional access control", desc: "Guests now access selected areas only — raising the overall security level of the facilities in production." },
-      ],
-
-      reflectionTitle: "What I'd do differently",
-      reflectionBody: [
-        "The biggest constraint on this project was the need to minimize developer effort. While this discipline sharpened my decision-making, it also meant some UX improvements were scoped out. In an ideal timeline, I would have conducted formal usability testing sessions with real operators before finalizing the redesign — validating the new flows earlier in the process.",
-      ],
-      reflectionQuote:
-        "Designing within resource constraints is a real skill. It forces you to prioritize ruthlessly — which, in hindsight, made every decision more intentional.",
-    },
-  },
-  {
     id: "inveron",
-    num: "03",
+    num: "02",
     title: "INVERON Console",
     titleBright: "Energy",
     titleDim: "Management Platform",
@@ -2594,6 +2500,7 @@ const CASES = [
     accent: "oklch(0.55 0.18 250)",
     cover: "cool",
     inProgress: true,
+    heroImage: "assets/inveron/hero.png",
     stats: [
       { value: "3", label: "User roles" },
       { value: "Full cycle", label: "Research → UI" },
@@ -2687,6 +2594,108 @@ const CASES = [
       ],
       reflectionQuote:
         "The simplest interface for the end user usually requires the most design work to get right — the complexity doesn't disappear, it just moves upstream.",
+      showcase: {
+        tiles: [
+          { label: "Monitoring",        image: "assets/inveron/showcase-monitoring.png" },
+          { label: "Detailed Info",     image: "assets/inveron/showcase-detailed-info.png" },
+          { label: "Devices List View", image: "assets/inveron/showcase-devices-list.png" },
+          { label: "Company Tree",      image: "assets/inveron/showcase-company-tree.png" },
+        ],
+      },
+    },
+  },
+  {
+    id: "psim",
+    num: "03",
+    title: "PSIM",
+    titleBright: "PSIM",
+    titleDim: "Security Console",
+    subtitle: "Physical security management platform",
+    year: "2025",
+    role: "Product Designer",
+    scope: "Enterprise · Desktop · B2B",
+    duration: "8 months",
+    tags: ["Enterprise", "Data", "Desktop"],
+    pills: ["Enterprise", "Desktop App", "Access Control", "Operator UX", "B2B"],
+    brief: "Redesigning a physical security management platform from a cluttered legacy interface to a fast, operator-first system. The redesign eliminated a critical bottleneck in the guest pass workflow and restructured information hierarchy across 12 system modules — with every decision justified by implementation cost.",
+    accent: "oklch(0.65 0.14 220)",
+    cover: "cool",
+    inProgress: true,
+    stats: [
+      { value: "~12", label: "System modules" },
+      { value: "Full cycle", label: "Research → UI" },
+      { value: "Solo", label: "Designer role" },
+      { value: "Shipped", label: "Production project" },
+    ],
+    sections: {
+      overviewTitle: "What is PSIM?",
+      overviewBody:
+        "PSIM (Physical Security Information Management) is a platform that unifies camera feeds, access control, alarms and dispatch into a single operator console. The platform is used by security teams managing physical access to facilities — operators work with it in real time, under time pressure, often monitoring multiple access points simultaneously.",
+
+      problemTitle: "A system that slowed people down",
+      problemBody:
+        "When I joined the project, a legacy interface already existed. It was outdated both visually and functionally — but the deeper issue wasn't aesthetic. After conversations with the product owner and the security operators, a critical workflow bottleneck emerged.",
+      challenges: [
+        {
+          icon: "users",
+          title: "Bottleneck at the checkpoint",
+          desc: "The guest pass form was accessible only to the security team — creating a single-department bottleneck for every visitor entry.",
+        },
+        {
+          icon: "search",
+          title: "No fast person lookup",
+          desc: "Finding information about a person at a checkpoint required navigating multiple screens, costing operators critical seconds.",
+        },
+        {
+          icon: "layers",
+          title: "Fragmented information hierarchy",
+          desc: "Responsible employee, access level, and visit history were scattered across the interface with no unified operator view.",
+        },
+      ],
+      constraint:
+        "The redesign had to minimize developer hours due to limited resources and tight delivery deadlines. Every decision had to be justified not just by UX value, but by implementation cost.",
+
+      researchTitle: "Understanding the workflow first",
+      researchBody: [
+        "Before touching any design tool, I interviewed the product owner and end users — security operators who work with the system every day. Their feedback revealed that the bottleneck wasn't just visual; it was a workflow problem embedded in how the system assigned responsibilities.",
+        "I also analyzed established PSIM platforms — Genetec, Lenel — to study interaction patterns for high-density, time-critical interfaces where finding information in seconds matters, not minutes.",
+      ],
+      insight:
+        "The guest request form was the single highest-friction point in the daily workflow. Expanding access to it — and redesigning it for speed — would deliver the highest impact with the lowest implementation cost.",
+
+      processTitle: "From research to final UI",
+      process: [
+        { num: "01", title: "Stakeholder & user interviews", desc: "Talked to the product owner and security operators. Mapped the existing workflow and identified where time was lost at each step." },
+        { num: "02", title: "Competitive analysis", desc: "Studied Genetec, Lenel, and other PSIM platforms to understand established interaction patterns for complex security interfaces." },
+        { num: "03", title: "Wireframes & information architecture", desc: "Restructured navigation and key modules. Focused on reducing cognitive load for operators working under real-time pressure." },
+        { num: "04", title: "Iterative UI design", desc: "Designed hi-fi screens in Figma, presenting iterations to the product owner and collecting feedback from the broader team." },
+        { num: "05", title: "Interactive prototype", desc: "Built a clickable prototype to validate the new guest request flow and access control workflows before engineering handoff." },
+      ],
+
+      designTitle: "Key decisions",
+      features: [
+        { kind: "unique", title: "Distributed guest request access", desc: "Any authorized employee can now initiate a guest request — not just security. This single change eliminated the main workflow bottleneck." },
+        { kind: "unique", title: "Redesigned person search", desc: "The search flow now surfaces responsible employee, access level, and visit history in as few interactions as possible." },
+        { kind: "core", title: "Sectional access passes", desc: "Guests access selected facility areas only — raising the overall security level without adding workflow complexity for operators." },
+        { kind: "core", title: "Resource-constrained decisions", desc: "Every change reused existing components where possible, focusing developer effort only where it delivered the most user value." },
+      ],
+
+      statusTitle: "What changed",
+      statusNote:
+        "After the redesign launched, the team confirmed that the new workflows reduced friction and improved operator confidence during access control events.",
+      results: [
+        { title: "Faster entry process", desc: "Guest and vehicle entry became significantly faster — the security-only bottleneck was eliminated across all checkpoints." },
+        { title: "Distributed workload", desc: "Any authorized employee can now initiate a guest request, distributing responsibility across the organization." },
+        { title: "Instant accountability", desc: "Operators can immediately identify who is responsible for any visitor — name, role, and access level visible at a glance." },
+        { title: "Sectional access control", desc: "Guests now access selected areas only — raising the overall security level of the facilities in production." },
+      ],
+
+      reflectionTitle: "What I'd do differently",
+      reflectionBody: [
+        "The biggest constraint on this project was the need to minimize developer effort. While this discipline sharpened my decision-making, it also meant some UX improvements were scoped out. In an ideal timeline, I would have conducted formal usability testing sessions with real operators before finalizing the redesign — validating the new flows earlier in the process.",
+      ],
+      reflectionQuote:
+        "Designing within resource constraints is a real skill. It forces you to prioritize ruthlessly — which, in hindsight, made every decision more intentional.",
     },
   },
   {
